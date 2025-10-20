@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      width: 600px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .container {
+      padding: 20px;
+    }
+    .header {
+      color: white;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 24px;
+    }
+    .mode-toggle {
+      display: flex;
+      gap: 5px;
+    }
+    .mode-btn {
+      background: rgba(255,255,255,0.3);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.5);
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    .mode-btn.active {
+      background: white;
+      color: #667eea;
+      border-color: white;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .card h2 {
+      font-size: 14px;
+      color: #667eea;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    .stat-label {
+      color: #666;
+    }
+    .stat-value {
+      font-weight: bold;
+      color: #333;
+      font-size: 16px;
+    }
+    .stat-good {
+      color: #27ae60;
+    }
+    .stat-bad {
+      color: #e74c3c;
+    }
+    .btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+    .timer-display {
+      text-align: center;
+      font-size: 48px;
+      font-weight: bold;
+      color: #667eea;
+      margin: 20px 0;
+      font-family: 'Courier New', monospace;
+    }
+    .timer-label {
+      text-align: center;
+      color: #999;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: #ecf0f1;
+      border-radius: 3px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      transition: width 0.3s ease;
+    }
+    .heatmap {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+      margin: 10px 0;
+    }
+    .heatmap-cell {
+      aspect-ratio: 1;
+      background: #ecf0f1;
+      border-radius: 4px;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+    }
+    .heatmap-cell.level-1 {
+      background: #c8e6c9;
+    }
+    .heatmap-cell.level-2 {
+      background: #81c784;
+    }
+    .heatmap-cell.level-3 {
+      background: #4caf50;
+      color: white;
+    }
+    .heatmap-cell.level-4 {
+      background: #2e7d32;
+      color: white;
+    }
+    .counter-box {
+      background: #f0f4ff;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      margin: 10px 0;
+    }
+    .counter-number {
+      font-size: 32px;
+      font-weight: bold;
+      color: #e74c3c;
+    }
+    .counter-label {
+      font-size: 12px;
+      color: #666;
+    }
+    .weekly-report {
+      background: #f0f4ff;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #333;
+    }
+    .accessibility-section {
+      background: #f9f9f9;
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 3px solid #667eea;
+    }
+    .accessibility-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 8px 0;
+      font-size: 13px;
+    }
+    .toggle-switch {
+      width: 40px;
+      height: 20px;
+      background: #ccc;
+      border-radius: 10px;
+      cursor: pointer;
+      position: relative;
+      transition: 0.3s;
+    }
+    .toggle-switch.on {
+      background: #667eea;
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: 0.3s;
+    }
+    .toggle-switch.on::after {
+      left: 22px;
+    }
+    .achievement {
+      display: inline-block;
+      font-size: 28px;
+      margin: 5px;
+    }
+    .nudge-box {
+      background: #d4edda;
+      border-left: 3px solid #28a745;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #155724;
+      margin-bottom: 12px;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>🎯 Focus Detective</h1>
+        <p style="font-size: 12px; opacity: 0.9;">Your AI distraction coach</p>
+      </div>
+      <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="normal">Normal</button>
+        <button class="mode-btn" data-mode="simple">Simple</button>
+      </div>
+    </div>
+
+    <div class="nudge-box" id="nudgeBox" style="display: none;"></div>
+
+    <!-- POMODORO TIMER SECTION -->
+    <div class="card" id="pomodoroCard">
+      <h2>⏱️ Pomodoro Timer</h2>
+      <div class="timer-label" id="timerLabel">Ready to focus?</div>
+      <div class="timer-display" id="timerDisplay">25:00</div>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-primary" id="startTimerBtn" style="flex: 1;">▶ Start</button>
+        <button class="btn" id="pauseTimerBtn" style="flex: 1; background: #ffc107; color: #333;">⏸ Pause</button>
+        <button class="btn" id="resetTimerBtn" style="flex: 1; background: #999; color: white;">↻ Reset</button>
+      </div>
+      <div style="display: flex; gap: 8px; margin-top: 8px;">
+        <button class="btn" id="breakTimerBtn" style="flex: 1; background: #27ae60; color: white;">☕ 5 min Break</button>
+        <button class="btn" id="customTimerBtn" style="flex: 1; background: #3498db; color: white;">⚙️ Custom</button>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="timerProgress" style="width: 100%"></div>
+      </div>
+    </div>
+
+    <!-- DISTRACTION COUNTER SECTION -->
+    <div class="card" id="counterCard">
+      <h2>🚫 Blocked Attempts Today</h2>
+      <div class="counter-box">
+        <div class="counter-number" id="blockedCounter">0</div>
+        <div class="counter-label">times you tried to visit distracting sites</div>
+      </div>
+      <div class="weekly-report" id="weeklyReport" style="display: none;">
+        <strong>📊 Weekly Report:</strong><br>
+        <div id="reportContent"></div>
+      </div>
+      <button class="btn btn-primary" id="weeklyReportBtn">📈 Generate Weekly Report</button>
+    </div>
+
+    <!-- ACCESSIBILITY SECTION -->
+    <div class="card" id="accessibilityCard">
+      <h2>♿ Accessibility & Simple Mode</h2>
+      <div class="accessibility-section">
+        <div class="accessibility-toggle">
+          <label>🎨 High Contrast Mode</label>
+          <div class="toggle-switch" id="contrastToggle"></div>
+        </div>
+        <div class="accessibility-toggle">
+          <label>🔤 Dyslexia-Friendly Font</label>
+          <div class="toggle-switch" id="dyslexiaToggle"></div>
+        </div>
+        <div class="accessibility-toggle">
+          <label>⚡ Reduce Motion</label>
+          <div class="toggle-switch" id="motionToggle"></div>
+        </div>
+        <div class="accessibility-toggle">
+          <label>🔊 Sound Alerts</label>
+          <div class="toggle-switch on" id="soundToggle"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI INSIGHTS SECTION -->
+    <div class="card" id="insightsCard">
+      <h2>💡 AI Insights & Daily Summary</h2>
+      <div id="insightsBox" style="font-size: 12px; line-height: 1.8; color: #333; background: #f0f4ff; padding: 12px; border-radius: 6px;">
+        <p style="text-align: center; color: #999;">Loading insights...</p>
+      </div>
+    </div>
+
+    <!-- ACHIEVEMENTS DETAILED SECTION -->
+    <div class="card" id="achievementsCard">
+      <h2>🏆 Today's Achievements</h2>
+      <div id="achievementsDetailed" style="text-align: center; padding: 10px;">
+        <p style="color: #999; font-size: 12px;">Keep focusing to unlock achievements!</p>
+      </div>
+    </div>
+
+    <!-- SESSION SUMMARY SECTION -->
+    <div class="card" id="summaryCard">
+      <h2>📝 Session Summary</h2>
+      <button class="btn btn-primary" id="summarizeBtn">📊 Generate Summary</button>
+      <div id="summaryBox" style="display: none; background: #f0f4ff; padding: 12px; border-radius: 6px; font-size: 12px; line-height: 1.6; margin-top: 10px; max-height: 200px; overflow-y: auto;"></div>
+    </div>
+      <div class="card">
+        <h2>⏱️ Focus Control</h2>
+        <button class="btn btn-primary" id="startFocusBtn">▶ Start Focus Mode</button>
+        <button class="btn" id="stopFocusBtn" style="display: none; background: #e74c3c; color: white;">⏸ Stop Focus Mode</button>
+      </div>
+
+      <div class="card">
+        <h2>📖 Reading Mode</h2>
+        <button class="btn btn-primary" id="readingModeBtn">📖 Enable Reading Mode</button>
+      </div>
+
+      <div class="card">
+        <h2>📊 Today's Stats</h2>
+        <div class="stat-row">
+          <span class="stat-label">Total Focus Time:</span>
+          <span class="stat-value stat-good" id="totalFocusTime">0h 0m</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Tab Switches:</span>
+          <span class="stat-value stat-bad" id="tabSwitches">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Focus Score:</span>
+          <span class="stat-value" id="focusScore">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>🔥 Heatmap & Achievements</h2>
+        <div class="heatmap" id="heatmap"></div>
+        <div style="text-align: center; margin-top: 10px;">
+          <span id="achievements"></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

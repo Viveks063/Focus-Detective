@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Focus Detective - AI Distraction Coach",
+  "version": "1.0",
+  "description": "Monitor your focus, detect distractions, and get AI-powered nudges to stay productive",
+  "permissions": [
+    "tabs",
+    "storage",
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Focus Detective Dashboard"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ]
+}
