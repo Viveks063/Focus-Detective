@@ -9,10 +9,10 @@
       box-sizing: border-box;
     }
     body {
-      width: 600px;
+      width: 400px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #333;
+      background: #f0f3f4;
+      color: #2c3e50;
       max-height: 90vh;
       overflow-y: auto;
     }
@@ -20,11 +20,15 @@
       padding: 20px;
     }
     .header {
+      background: linear-gradient(135deg, #0ca840 0%, #34495e 100%);
       color: white;
-      margin-bottom: 20px;
+      padding: 18px 28px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      flex-shrink: 0;
+      border-radius: 12px;
     }
     .header h1 {
       font-size: 24px;
@@ -52,15 +56,22 @@
     .card {
       background: white;
       border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      transition: all 0.3s ease;
+      margin: 7px;
     }
-    .card h2 {
-      font-size: 14px;
-      color: #667eea;
-      margin-bottom: 10px;
-      font-weight: 600;
+    .card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+    .card h3 {
+      font-size: 13px;
+      color: #2c3e50;
+      margin-bottom: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     .stat-row {
       display: flex;
@@ -85,36 +96,38 @@
     }
     .btn {
       padding: 10px 15px;
+      width: 100%;
+      padding: 12px;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 600;
       transition: all 0.3s ease;
-      width: 100%;
-      margin-bottom: 8px;
+      margin-top: 10px;
     }
     .btn-primary {
-      background: linear-gradient(135deg, #667eea, #764ba2);
+      background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
       color: white;
     }
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 4px 12px rgba(26,188,156,0.3);
     }
     .timer-display {
       text-align: center;
       font-size: 48px;
       font-weight: bold;
-      color: #667eea;
+      color: #7f8c8d;
       margin: 20px 0;
       font-family: 'Courier New', monospace;
     }
     .timer-label {
-      text-align: center;
-      color: #999;
-      font-size: 12px;
-      margin-bottom: 10px;
+      font-size: 42px;
+      font-weight: 800;
+      color: #2c3e50;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 2px;
     }
     .progress-bar {
       width: 100%;
@@ -206,7 +219,7 @@
       transition: 0.3s;
     }
     .toggle-switch.on {
-      background: #667eea;
+      background: #1abc9c;
     }
     .toggle-switch::after {
       content: '';
@@ -239,6 +252,88 @@
     .hidden {
       display: none;
     }
+    .current-site-box {
+      background: linear-gradient(135deg, #667eea15, #764ba215);
+      border-left: 4px solid #667eea;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .current-site-label {
+      font-size: 11px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .current-site-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #667eea;
+      word-break: break-all;
+    }
+    .site-type {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-top: 6px;
+    }
+    .site-type.productive {
+      background: #d4edda;
+      color: #155724;
+    }
+    .site-type.distraction {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .site-time {
+      font-size: 12px;
+      color: #666;
+      margin-top: 6px;
+    }
+    .sites-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .site-item {
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      border-left: 3px solid #ddd;
+    }
+    .site-item.productive {
+      border-left-color: #27ae60;
+      background: #f0fdf4;
+    }
+    .site-item.distraction {
+      border-left-color: #e74c3c;
+      background: #fdf5f5;
+    }
+    .site-name {
+      font-weight: 600;
+      color: #333;
+      flex: 1;
+      word-break: break-all;
+    }
+    .site-duration {
+      color: #999;
+      font-size: 11px;
+      margin-left: 10px;
+    }
+    .empty-state {
+      text-align: center;
+      color: #999;
+      font-size: 12px;
+      padding: 20px;
+    }
   </style>
 </head>
 <body>
@@ -256,24 +351,99 @@
 
     <div class="nudge-box" id="nudgeBox" style="display: none;"></div>
 
-    <!-- POMODORO TIMER SECTION -->
-    <div class="card" id="pomodoroCard">
-      <h2>⏱️ Pomodoro Timer</h2>
-      <div class="timer-label" id="timerLabel">Ready to focus?</div>
-      <div class="timer-display" id="timerDisplay">25:00</div>
-      <div style="display: flex; gap: 8px;">
-        <button class="btn btn-primary" id="startTimerBtn" style="flex: 1;">▶ Start</button>
-        <button class="btn" id="pauseTimerBtn" style="flex: 1; background: #ffc107; color: #333;">⏸ Pause</button>
-        <button class="btn" id="resetTimerBtn" style="flex: 1; background: #999; color: white;">↻ Reset</button>
-      </div>
-      <div style="display: flex; gap: 8px; margin-top: 8px;">
-        <button class="btn" id="breakTimerBtn" style="flex: 1; background: #27ae60; color: white;">☕ 5 min Break</button>
-        <button class="btn" id="customTimerBtn" style="flex: 1; background: #3498db; color: white;">⚙️ Custom</button>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="timerProgress" style="width: 100%"></div>
+    <!-- CURRENT SITE TRACKING -->
+    <div class="card">
+      <h2>📍 Current Activity</h2>
+      <div class="current-site-box">
+        <div class="current-site-label">Currently on:</div>
+        <div class="current-site-name" id="currentSite">Not detected</div>
+        <div class="site-time" id="currentSiteTime"></div>
+        <div id="currentSiteType"></div>
       </div>
     </div>
+
+    <!-- VISITED SITES -->
+    <div class="card">
+      <h2>🌐 Visited Sites Today</h2>
+      <div id="sitesList" class="sites-list">
+        <div class="empty-state">No sites tracked yet. Start a focus session!</div>
+      </div>
+    </div>
+
+    <!-- GOALS & PROGRESS SECTION -->
+    <div class="card" id="goalsCard">
+      <h2>🎯 Daily Goals</h2>
+      <div style="margin-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 13px; font-weight: 600;">Today's Focus Goal:</span>
+          <button class="btn btn-primary" id="setGoalBtn" style="width: auto; padding: 6px 12px; font-size: 11px;">⚙️ Set Goal</button>
+        </div>
+        <div id="goalDisplay" style="background: #f0f4ff; padding: 15px; border-radius: 8px; text-align: center;">
+          <div id="goalText" style="font-size: 14px; color: #667eea; font-weight: bold; margin-bottom: 8px;">Goal: 2 hours of focus</div>
+          <div id="goalProgress" style="font-size: 24px; font-weight: bold; color: #333; margin: 10px 0;">0h 0m / 2h 0m</div>
+          <div class="progress-bar" style="height: 12px; margin-top: 10px;">
+            <div class="progress-fill" id="goalProgressBar" style="width: 0%; background: linear-gradient(90deg, #27ae60, #2ecc71);"></div>
+          </div>
+          <div id="goalStatus" style="font-size: 12px; color: #666; margin-top: 8px;">Keep going! You got this 💪</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 15px;">
+        <h3 style="font-size: 13px; color: #667eea; margin-bottom: 10px;">🔥 Goal Streak</h3>
+        <div style="display: flex; justify-content: space-around; text-align: center;">
+          <div>
+            <div style="font-size: 28px; font-weight: bold; color: #e74c3c;" id="goalStreakCurrent">0</div>
+            <div style="font-size: 11px; color: #999;">Current Streak</div>
+          </div>
+          <div>
+            <div style="font-size: 28px; font-weight: bold; color: #f39c12;" id="goalStreakBest">0</div>
+            <div style="font-size: 11px; color: #999;">Best Streak</div>
+          </div>
+          <div>
+            <div style="font-size: 28px; font-weight: bold; color: #27ae60;" id="goalCompletedTotal">0</div>
+            <div style="font-size: 11px; color: #999;">Total Completed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEEKLY GOALS INSIGHTS -->
+    <div class="card" id="weeklyGoalsCard">
+      <h2>📊 Weekly Goal Insights</h2>
+      <div id="weeklyGoalsContent" style="font-size: 12px; line-height: 1.8;">
+        <p style="text-align: center; color: #999;">Complete goals to see insights</p>
+      </div>
+      <button class="btn btn-primary" id="weeklyGoalsBtn" style="margin-top: 10px;">📈 View Weekly Report</button>
+    </div>
+
+    <!-- AI CHROME APIS SECTION -->
+    <div class="card" id="aiApisCard">
+      <h2>🤖 AI Writing Assistant</h2>
+      <div style="margin-bottom: 12px;">
+        <textarea id="aiInputText" placeholder="Enter text here..." style="width: 100%; height: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; resize: vertical;"></textarea>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;">
+        <button class="btn btn-primary" id="summarizeTextBtn">📝 Summarize</button>
+        <button class="btn btn-primary" id="rewriteTextBtn">✏️ Rewrite</button>
+        <button class="btn btn-primary" id="improveTextBtn">✨ Improve</button>
+        <button class="btn btn-primary" id="simplifyTextBtn">🔤 Simplify</button>
+      </div>
+      <div id="aiOutputText" style="background: #f0f4ff; padding: 12px; border-radius: 6px; font-size: 12px; line-height: 1.6; min-height: 60px; display: none;"></div>
+      <div id="aiStatus" style="font-size: 11px; color: #999; margin-top: 8px; text-align: center;">AI features powered by Chrome built-in AI</div>
+    </div>
+
+    <!-- VOICE COMMANDS SECTION
+    <div class="card" id="voiceCard">
+      <h2>🎤 Voice Commands</h2>
+      <p style="font-size: 11px; color: #666; margin-bottom: 10px;">Control Focus Detective with your voice!</p>
+      <button class="btn btn-primary" id="voiceStartBtn" style="margin-bottom: 10px;">🎤 Start Listening</button>
+      <div id="voiceStatus" style="background: #f0f4ff; padding: 10px; border-radius: 6px; font-size: 12px; text-align: center;">
+        Say: "Start focus", "Stop focus", "Set goal", "Show stats"
+      </div>
+      <div id="voiceTranscript" style="background: #fff; padding: 10px; border-radius: 6px; font-size: 11px; margin-top: 8px; border: 1px solid #ddd; min-height: 40px; color: #999;">
+        Voice transcript will appear here...
+      </div>
+    </div> -->
 
     <!-- DISTRACTION COUNTER SECTION -->
     <div class="card" id="counterCard">
@@ -337,6 +507,7 @@
       <div class="card">
         <h2>⏱️ Focus Control</h2>
         <button class="btn btn-primary" id="startFocusBtn">▶ Start Focus Mode</button>
+        <button class="btn" id="resetFocusBtn" style="display: none; background: #95a5a6; color: white;">🔄 Reset Timer</button>
         <button class="btn" id="stopFocusBtn" style="display: none; background: #e74c3c; color: white;">⏸ Stop Focus Mode</button>
       </div>
 
@@ -364,13 +535,7 @@
         </div>
       </div>
 
-      <div class="card">
-        <h2>🔥 Heatmap & Achievements</h2>
-        <div class="heatmap" id="heatmap"></div>
-        <div style="text-align: center; margin-top: 10px;">
-          <span id="achievements"></span>
-        </div>
-      </div>
+      
     </div>
 
   </div>

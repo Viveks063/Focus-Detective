@@ -8,23 +8,52 @@ function isDistraction(hostname) {
 
 // Initialize data
 function initializeData() {
-  chrome.storage.local.get(['focusData'], (data) => {
+  chrome.storage.local.get(['focusData', 'currentSessionTime'], (data) => {
     if (!data.focusData) {
       chrome.storage.local.set({
         focusData: {
           totalFocusTime: 0,
           tabSwitches: 0,
           distractionTime: 0,
-          sites: {},
-          sessionStart: Date.now()
+          sites: {}
         },
         streaks: {
           current: 0,
           best: 0,
           lastDate: new Date().toDateString()
         },
-        hourlyData: {}
+        hourlyData: {},
+        currentSessionTime: 0
       });
+    }
+  });
+}
+
+// Update current site display
+function updateCurrentSite(tabId) {
+  chrome.tabs.get(tabId, (tab) => {
+    if (chrome.runtime.lastError || !tab) return;
+
+    try {
+      const url = new URL(tab.url);
+      const hostname = url.hostname;
+
+      chrome.storage.local.get('focusData', (data) => {
+        const focusData = data.focusData || {};
+        
+        // Save current site info
+        chrome.storage.local.set({
+          currentSite: {
+            url: tab.url,
+            hostname: hostname,
+            isDistraction: isDistraction(hostname),
+            timeOnSite: focusData.sites?.[hostname]?.time || 0,
+            tabId: tabId
+          }
+        });
+      });
+    } catch (e) {
+      console.log('Error parsing URL:', e);
     }
   });
 }
@@ -52,6 +81,9 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
     chrome.storage.local.set({ focusData });
   });
 
+  // Update current site display
+  updateCurrentSite(activeInfo.tabId);
+
   // Check focus mode and block if needed
   chrome.tabs.get(activeInfo.tabId, (tab) => {
     if (chrome.runtime.lastError) {
@@ -67,6 +99,12 @@ chrome.tabs.onActivated.addListener((activeInfo) => {
 // Listen for tab updates (when URL changes)
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' || changeInfo.url) {
+    // Update current site if this is the active tab
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0] && tabs[0].id === tabId) {
+        updateCurrentSite(tabId);
+      }
+    });
     checkFocusMode(tab);
   }
 });
@@ -85,11 +123,12 @@ function updateSiteTime(tabId, timeSpent) {
       const url = new URL(tab.url);
       const hostname = url.hostname;
 
-      chrome.storage.local.get(['focusData', 'hourlyData'], (data) => {
+      chrome.storage.local.get(['focusData', 'hourlyData', 'focusMode'], (data) => {
         if (!data.focusData) return;
 
         const focusData = data.focusData;
         const hourlyData = data.hourlyData || {};
+        const focusMode = data.focusMode || { active: false };
 
         if (!focusData.sites[hostname]) {
           focusData.sites[hostname] = { time: 0, isDistraction: isDistraction(hostname) };
@@ -97,17 +136,19 @@ function updateSiteTime(tabId, timeSpent) {
 
         focusData.sites[hostname].time += timeSpent;
 
-        // Update total time
-        if (isDistraction(hostname)) {
-          focusData.distractionTime += timeSpent;
-        } else {
-          focusData.totalFocusTime += timeSpent;
-          
-          // Track hourly data
-          const now = new Date();
-          const hour = now.getHours();
-          if (!hourlyData[hour]) hourlyData[hour] = 0;
-          hourlyData[hour] += timeSpent;
+        // Update total time only if focus mode is active
+        if (focusMode.active) {
+          if (isDistraction(hostname)) {
+            focusData.distractionTime += timeSpent;
+          } else {
+            focusData.totalFocusTime += timeSpent;
+            
+            // Track hourly data
+            const now = new Date();
+            const hour = now.getHours();
+            if (!hourlyData[hour]) hourlyData[hour] = 0;
+            hourlyData[hour] += timeSpent;
+          }
         }
 
         chrome.storage.local.set({ focusData, hourlyData });
@@ -168,11 +209,16 @@ function scheduleDailyReset() {
 
   setTimeout(() => {
     // Check if focus time > 1 hour for streak
-    chrome.storage.local.get(['focusData', 'streaks'], (data) => {
+    chrome.storage.local.get(['focusData', 'streaks', 'dailyGoal', 'goalStats', 'weeklyGoalData', 'currentSessionTime'], (data) => {
       const focusData = data.focusData;
       const streaks = data.streaks || { current: 0, best: 0 };
+      const dailyGoal = data.dailyGoal || { hours: 2, minutes: 0 };
+      const goalStats = data.goalStats || { currentStreak: 0, bestStreak: 0, totalCompleted: 0 };
+      const weeklyGoalData = data.weeklyGoalData || {};
+      const currentSessionTime = data.currentSessionTime || 0;
       
-      if (focusData && focusData.totalFocusTime >= 3600) { // 1 hour minimum
+      // Check focus streak (1+ hour)
+      if (focusData && focusData.totalFocusTime >= 3600) {
         streaks.current += 1;
         if (streaks.current > streaks.best) {
           streaks.best = streaks.current;
@@ -181,17 +227,32 @@ function scheduleDailyReset() {
         streaks.current = 0;
       }
       
-      // Reset daily data
+      // Check goal completion (use currentSessionTime for goal tracking)
+      const goalSeconds = (dailyGoal.hours * 3600) + (dailyGoal.minutes * 60);
+      const today = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+      
+      if (currentSessionTime >= goalSeconds) {
+        weeklyGoalData[today] = true;
+      } else {
+        weeklyGoalData[today] = false;
+        // Break goal streak if not completed
+        goalStats.currentStreak = 0;
+      }
+      
+      // Reset daily data but keep currentSessionTime if it's part of the same goal
       chrome.storage.local.set({
         focusData: {
           totalFocusTime: 0,
           tabSwitches: 0,
           distractionTime: 0,
-          sites: {},
-          sessionStart: Date.now()
+          sites: {}
         },
         streaks: streaks,
-        hourlyData: {}
+        goalStats: goalStats,
+        weeklyGoalData: weeklyGoalData,
+        hourlyData: {},
+        currentSite: {},
+        currentSessionTime: 0  // Reset session time at midnight
       });
     });
 
@@ -199,6 +260,133 @@ function scheduleDailyReset() {
   }, msUntilMidnight);
 }
 
-// Initialize
+// ===== PROACTIVE VOICE ASSISTANT =====
+
+let siteTimeTracking = {};
+let lastNudgeTime = {};
+
+function speakNotification(text) {
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    speechSynthesis.speak(utterance);
+  }
+}
+
+function checkProactiveNudges() {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!tabs[0]) return;
+
+    const tab = tabs[0];
+    const url = new URL(tab.url);
+    const hostname = url.hostname;
+
+    chrome.storage.local.get(['focusMode', 'focusData', 'dailyGoal'], (data) => {
+      const focusMode = data.focusMode || { active: false };
+      const focusData = data.focusData || {};
+      const dailyGoal = data.dailyGoal || { hours: 2, minutes: 0 };
+
+      if (!focusMode.active) return;
+
+      // Track time on current site
+      if (!siteTimeTracking[hostname]) {
+        siteTimeTracking[hostname] = 0;
+      }
+      siteTimeTracking[hostname] += 1;
+
+      const isDistraction = isDistraction(hostname);
+      const timeOnSite = siteTimeTracking[hostname];
+      const focusScore = calculateFocusScore(focusData);
+
+      // NUDGE 1: Spending too long on distraction site
+      if (isDistraction && timeOnSite > 1200 && (!lastNudgeTime[hostname] || Date.now() - lastNudgeTime[hostname] > 600000)) {
+        const minutes = Math.floor(timeOnSite / 60);
+        chrome.runtime.sendMessage({
+          action: 'showNudge',
+          message: `You've been on ${hostname.split('.')[0]} for ${minutes} minutes. Switch back to work?`,
+          type: 'distraction'
+        }).catch(() => {});
+        
+        speakNotification(`You've been on ${hostname.split('.')[0]} for ${minutes} minutes. Consider switching back to work.`);
+        lastNudgeTime[hostname] = Date.now();
+      }
+
+      // NUDGE 2: Focus score dropping
+      if (focusScore < 40 && (!lastNudgeTime['score'] || Date.now() - lastNudgeTime['score'] > 900000)) {
+        chrome.runtime.sendMessage({
+          action: 'showNudge',
+          message: `Your focus score is at ${focusScore}%. Would you like a 5-minute break?`,
+          type: 'break'
+        }).catch(() => {});
+
+        speakNotification(`Your focus score is dropping. Would you like a 5-minute break?`);
+        lastNudgeTime['score'] = Date.now();
+      }
+
+      // NUDGE 3: Goal progress update
+      const goalSeconds = (dailyGoal.hours * 3600) + (dailyGoal.minutes * 60);
+      const progress = Math.round((focusData.totalFocusTime / goalSeconds) * 100);
+      
+      if (progress > 0 && progress % 25 === 0 && (!lastNudgeTime['progress'] || Date.now() - lastNudgeTime['progress'] > 1800000)) {
+        chrome.runtime.sendMessage({
+          action: 'showNudge',
+          message: `Great job! You're ${progress}% of the way to your goal!`,
+          type: 'positive'
+        }).catch(() => {});
+
+        speakNotification(`Great job! You're ${progress} percent of the way to your goal!`);
+        lastNudgeTime['progress'] = Date.now();
+      }
+    });
+  });
+}
+
+function calculateFocusScore(focusData) {
+  const totalTime = (focusData.totalFocusTime || 0) + (focusData.distractionTime || 0);
+  return totalTime > 0 ? Math.round((focusData.totalFocusTime / totalTime) * 100) : 0;
+}
+
+// Check for nudges every 60 seconds
+setInterval(checkProactiveNudges, 60000);
+
+// ===== READING MODE =====
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'enableReadingMode') {
+    chrome.tabs.sendMessage(sender.tab.id, {
+      action: 'activateReadingMode'
+    });
+  }
+  
+  if (request.action === 'summarizePage') {
+    // Get page content and send to popup for summarization
+    chrome.tabs.sendMessage(sender.tab.id, {
+      action: 'getPageContent'
+    }, (response) => {
+      if (response && response.content) {
+        sendResponse({ summary: generateSummary(response.content) });
+      }
+    });
+    return true;
+  }
+
+  if (request.action === 'textToSpeech') {
+    const utterance = new SpeechSynthesisUtterance(request.text);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    speechSynthesis.speak(utterance);
+    sendResponse({ status: 'speaking' });
+  }
+});
+
+function generateSummary(content) {
+  // Simple extractive summarization (can be replaced with AI API)
+  const sentences = content.split(/[.!?]+/).filter(s => s.trim().length > 10);
+  const summaryLength = Math.ceil(sentences.length / 3);
+  return sentences.slice(0, summaryLength).join('. ') + '.';
+}
+
+// Initialize everything
 initializeData();
 scheduleDailyReset();

@@ -7,8 +7,10 @@
     "tabs",
     "storage",
     "scripting",
-    "activeTab"
+    "activeTab",
+    "notifications"
   ],
+  
   "host_permissions": [
     "<all_urls>"
   ],
@@ -26,5 +28,9 @@
       "run_at": "document_start",
       "all_frames": false
     }
-  ]
+  ],
+"web_accessible_resources": [{
+  "resources": ["dashboard.html"],
+  "matches": ["<all_urls>"]
+}]
 }
